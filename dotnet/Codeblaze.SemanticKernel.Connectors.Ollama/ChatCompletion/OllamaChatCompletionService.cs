@@ -60,16 +60,10 @@ public class OllamaChatCompletionService(
 
         using var reader = new StreamReader(stream);
 
-        var done = false;
-
-        while (!done)
+        while (await reader.ReadLineAsync() is string line)
         {
-            string jsonResponse = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
-
-            var chatResponseMessage = JsonSerializer.Deserialize<OllamaChatResponseMessage>(jsonResponse);
-            done = chatResponseMessage!.Done;
-
-            yield return chatResponseMessage!.ToStreamingChatMessageContent();
+            yield return JsonSerializer.Deserialize<OllamaChatResponseMessage>(line)!.ToStreamingChatMessageContent();
+            await Task.Delay(50);
         }
     }
 
